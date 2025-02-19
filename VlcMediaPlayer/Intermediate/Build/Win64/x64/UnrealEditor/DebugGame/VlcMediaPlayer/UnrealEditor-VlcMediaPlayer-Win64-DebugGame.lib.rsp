@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-VlcMediaPlayer-Win64-DebugGame.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"D:\Projects\UnrealProjects\TestProjects\VlcTest\Intermediate\Build\Win64\x64\VlcTestEditor\DebugGame\Engine\SharedPCH.Engine.NonOptimized.Cpp20.h.obj"
+"D:\Projects\UnrealProjects\TestProjects\VlcTest\Plugins\VlcMediaPlayer\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\VlcMediaPlayer\Module.VlcMediaPlayer.cpp.obj"
+"D:\Projects\UnrealProjects\TestProjects\VlcTest\Plugins\VlcMediaPlayer\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\VlcMediaPlayer\Default.rc2.res"
+/OUT:"D:\Projects\UnrealProjects\TestProjects\VlcTest\Plugins\VlcMediaPlayer\Intermediate\Build\Win64\x64\UnrealEditor\DebugGame\VlcMediaPlayer\UnrealEditor-VlcMediaPlayer-Win64-DebugGame.lib"

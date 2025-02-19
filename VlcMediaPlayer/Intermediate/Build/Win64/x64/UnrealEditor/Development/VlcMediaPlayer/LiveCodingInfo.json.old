@@ -1,0 +1,11 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.VlcMediaPlayer.cpp.obj": [
+			"VlcMediaPlayer.init.gen.cpp.obj",
+			"VlcPlayerWidget.gen.cpp.obj",
+			"VlcMediaPlayer.cpp.obj",
+			"VlcPlayerWidget.cpp.obj"
+		]
+	}
+}
