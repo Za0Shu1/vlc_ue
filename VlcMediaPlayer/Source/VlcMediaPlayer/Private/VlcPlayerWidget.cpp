@@ -26,7 +26,7 @@ void UVlcPlayerWidget::PlayVideo(const FString& VideoPath)
 		TArray<uint8> FrameData;
 		while (VlcThread && VlcThread->FrameDataQueue.Dequeue(FrameData))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("update texture"));
+			// UE_LOG(LogTemp, Warning, TEXT("update texture"));
 			UpdateTexture(FrameData);
 		}
 		return true;

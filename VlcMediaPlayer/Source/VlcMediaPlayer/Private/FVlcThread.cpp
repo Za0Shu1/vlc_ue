@@ -1,8 +1,5 @@
 ﻿#include "FVlcThread.h"
 
-#include "IImageWrapper.h"
-#include "IImageWrapperModule.h"
-
 FVlcThread::FVlcThread(const FString& InVideoPath)
 	: VideoPath(InVideoPath), Thread(nullptr), bIsRunning(false),
 	  VlcInstance(nullptr), VlcMedia(nullptr), VlcMediaPlayer(nullptr),
@@ -38,24 +35,36 @@ uint32 FVlcThread::Run()
 {
 	// open media
 	VlcMedia = libvlc_media_new_location(VlcInstance,TCHAR_TO_ANSI(*VideoPath));
+	if (!VlcMedia)
+	{
+		StopThread();
+		return 1;
+	}
 	VlcMediaPlayer = libvlc_media_player_new_from_media(VlcMedia);
+	if (!VlcMediaPlayer)
+	{
+		StopThread();
+		return 1;
+	}
 	libvlc_media_release(VlcMedia);
+	VlcMedia = nullptr;
 
 	// set callbacks
 	libvlc_video_set_format(VlcMediaPlayer, "RGBA", VideoWidth, VideoHeight, VideoWidth * 4);
 	libvlc_video_set_callbacks(VlcMediaPlayer, &FVlcThread::VlcLock, &FVlcThread::VlcUnlock, nullptr, this);
 
-	libvlc_media_player_play(VlcMediaPlayer);
+	if (libvlc_media_player_play(VlcMediaPlayer) != 0)
+	{
+		StopThread();
+		return 1;
+	}
 	while (bIsRunning)
 	{
-		if (libvlc_media_player_is_playing(VlcMediaPlayer))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Video is playing and decoding frames."));
-		}
-		else
+		if (!libvlc_media_player_is_playing(VlcMediaPlayer))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Video is not playing yet, waiting for frames..."));
 		}
+
 		FPlatformProcess::Sleep(0.2f);
 	}
 
@@ -80,7 +89,7 @@ void* FVlcThread::VlcLock(void* Opaque, void** Pixels)
 		const int FrameSize = VlcThread->VideoWidth * VlcThread->VideoHeight * 4;
 		VlcThread->LockedBuffer.SetNumUninitialized(FrameSize);
 		*Pixels = VlcThread->LockedBuffer.GetData();
-		UE_LOG(LogTemp, Warning, TEXT("lock"));
+		// UE_LOG(LogTemp, Warning, TEXT("lock"));
 	}
 	return nullptr;
 }
@@ -94,7 +103,7 @@ void FVlcThread::VlcUnlock(void* Opaque, void* Picture, void* const* Planes)
 		FrameData.Append((uint8*)(*Planes), VlcThread->VideoWidth * VlcThread->VideoHeight * 4);
 		VlcThread->FrameDataQueue.Enqueue(MoveTemp(FrameData));
 
-		UE_LOG(LogTemp, Warning, TEXT("unlock"));
+		// UE_LOG(LogTemp, Warning, TEXT("unlock"));
 	}
 	else
 	{
@@ -104,9 +113,22 @@ void FVlcThread::VlcUnlock(void* Opaque, void* Picture, void* const* Planes)
 
 void FVlcThread::StopThread()
 {
+	if(!bIsRunning) // already stopped
+	{
+		return;
+	}
+	
 	bIsRunning = false;
 	UE_LOG(LogTemp, Warning, TEXT("Stop Thread"));
 
+	// release media
+	if (VlcMedia)
+	{
+		libvlc_media_release(VlcMedia);
+		VlcMedia = nullptr;
+	}
+
+	// stop and release player
 	if (VlcMediaPlayer)
 	{
 		libvlc_media_player_stop(VlcMediaPlayer);
@@ -135,6 +157,7 @@ void FVlcThread::StopThread()
 
 	UE_LOG(LogTemp, Warning, TEXT("Release VlcInstance"));
 
+	// release instance
 	if (VlcInstance)
 	{
 		libvlc_release(VlcInstance);
