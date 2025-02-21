@@ -40,6 +40,7 @@ uint32 FVlcThread::Run()
 		StopThread();
 		return 1;
 	}
+
 	VlcMediaPlayer = libvlc_media_player_new_from_media(VlcMedia);
 	if (!VlcMediaPlayer)
 	{
@@ -52,6 +53,30 @@ uint32 FVlcThread::Run()
 	// set callbacks
 	libvlc_video_set_format(VlcMediaPlayer, "RGBA", VideoWidth, VideoHeight, VideoWidth * 4);
 	libvlc_video_set_callbacks(VlcMediaPlayer, &FVlcThread::VlcLock, &FVlcThread::VlcUnlock, nullptr, this);
+
+	// 遍历音频输出模块 (vlc默认输出在扬声器上，在显示器中无法听到)
+	libvlc_audio_output_t* p_audio_outputs = libvlc_audio_output_list_get(VlcInstance);
+	libvlc_audio_output_t* p_output = p_audio_outputs;
+	while (p_output != nullptr)
+	{
+		// 获取该输出模块的设备列表
+		libvlc_audio_output_device_t* p_devices = libvlc_audio_output_device_list_get(VlcInstance, p_output->psz_name);
+		if (p_devices != nullptr)
+		{
+			// 遍历设备并添加到列表
+			libvlc_audio_output_device_t* p_device = p_devices;
+			while (p_device != nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s.(%s)"), *FString(p_device->psz_device),
+				       *FString(p_device->psz_description));
+				p_device = p_device->p_next;
+			}
+			libvlc_audio_output_device_list_release(p_devices);
+		}
+		p_output = p_output->p_next;
+	}
+	libvlc_audio_output_list_release(p_audio_outputs);
+
 
 	if (libvlc_media_player_play(VlcMediaPlayer) != 0)
 	{
@@ -113,11 +138,11 @@ void FVlcThread::VlcUnlock(void* Opaque, void* Picture, void* const* Planes)
 
 void FVlcThread::StopThread()
 {
-	if(!bIsRunning) // already stopped
+	if (!bIsRunning) // already stopped
 	{
 		return;
 	}
-	
+
 	bIsRunning = false;
 	UE_LOG(LogTemp, Warning, TEXT("Stop Thread"));
 
