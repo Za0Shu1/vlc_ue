@@ -51,9 +51,11 @@ private:
 	UPROPERTY()
 	UTexture2D* VideoTexture;
 
+	TSharedPtr<FSlateBrush> VideoBrush;
+
 	// vlc thread instance
 	TUniquePtr<FVlcThread> VlcThread;
 
-	void UpdateTexture(const TArray<uint8>& FrameData) const;
+	void UpdateTexture(TArray<uint8>& FrameData) const;
 	FTSTicker::FDelegateHandle FrameTickerHandle;
 };

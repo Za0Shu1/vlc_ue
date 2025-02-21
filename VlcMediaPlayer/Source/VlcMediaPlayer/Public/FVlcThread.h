@@ -14,7 +14,7 @@ public:
 	void StopThread();
 
 	// Frame Data (ThreadSafe)
-	TQueue<TArray<uint8>, EQueueMode::Mpsc> FrameDataQueue;
+	TQueue<TArray<uint8>> FrameDataQueue;
 
 protected:
 	// RRunnable Interface
@@ -38,6 +38,11 @@ private:
 	// Video param
 	int32 VideoWidth;
 	int32 VideoHeight;
+
+	// Video buffer
+	TArray<uint8> LockedBuffer;
+	static void* VlcLock(void* Opaque,void** Pixels);
+	static void VlcUnlock(void* Opaque, void* Picture, void* const* Planes);
 
 	// test
 	int32 Count;
