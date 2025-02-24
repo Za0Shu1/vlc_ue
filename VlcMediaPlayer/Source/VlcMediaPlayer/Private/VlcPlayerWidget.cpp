@@ -21,16 +21,16 @@ void UVlcPlayerWidget::PlayVideo(const FString& VideoPath)
 	VideoBrush->SetResourceObject(VideoTexture);
 
 	// @TODO: Set Delay/Interval for ticker
-	FrameTickerHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([this](float DeltaTime)
-	{
-		TArray<uint8> FrameData;
-		while (VlcThread && VlcThread->FrameDataQueue.Dequeue(FrameData))
-		{
-			// UE_LOG(LogTemp, Warning, TEXT("update texture"));
-			UpdateTexture(FrameData);
-		}
-		return true;
-	}), 0.f);
+	// FrameTickerHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([this](float DeltaTime)
+	// {
+	// 	TArray<uint8> FrameData;
+	// 	while (VlcThread && VlcThread->FrameDataQueue.Dequeue(FrameData))
+	// 	{
+	// 		// UE_LOG(LogTemp, Warning, TEXT("update texture"));
+	// 		UpdateTexture(FrameData);
+	// 	}
+	// 	return true;
+	// }), 0.f);
 }
 
 void UVlcPlayerWidget::StopVideo()

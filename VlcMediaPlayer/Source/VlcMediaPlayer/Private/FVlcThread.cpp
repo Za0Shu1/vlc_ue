@@ -25,14 +25,19 @@ bool FVlcThread::Init()
 {
 	// init libvlc
 	const char* VlcArgs[] = {"--no-xlib"};
+	double StartTime = FPlatformTime::Seconds();
 	VlcInstance = libvlc_new(1, VlcArgs);
+	double InitTime = FPlatformTime::Seconds() - StartTime;
 	UE_LOG(LogTemp, Warning, TEXT("Thread Init"));
+	UE_LOG(LogTemp, Warning, TEXT("VLC Initialization Time: %f seconds"), InitTime);
 
 	return (VlcInstance != nullptr);
 }
 
 uint32 FVlcThread::Run()
 {
+	double StartTime = FPlatformTime::Seconds();
+	
 	// open media
 	VlcMedia = libvlc_media_new_location(VlcInstance,TCHAR_TO_ANSI(*VideoPath));
 	if (!VlcMedia)
@@ -83,11 +88,14 @@ uint32 FVlcThread::Run()
 		StopThread();
 		return 1;
 	}
+
+	double InitTime = FPlatformTime::Seconds() - StartTime;
+	UE_LOG(LogTemp, Warning, TEXT("Vlc Run Time: %f seconds"), InitTime);
 	while (bIsRunning)
 	{
 		if (!libvlc_media_player_is_playing(VlcMediaPlayer))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Video is not playing yet, waiting for frames..."));
+			//UE_LOG(LogTemp, Warning, TEXT("Video is not playing yet, waiting for frames..."));
 		}
 
 		FPlatformProcess::Sleep(0.2f);
